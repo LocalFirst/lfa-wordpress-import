@@ -6,9 +6,17 @@ module WordPressImport
       @author_node = author_node
     end
 
+    def first_name
+      author_node.xpath("wp:author_first_name").text
+    end
+
+    def last_name
+      author_node.xpath("wp:author_last_name").text
+    end
+
     def name
       name = author_node.xpath("wp:author_display_name").text
-      name = author_node.xpath("wp:author_first_name").text + " " + author_node.xpath("wp:author_first_name").text if name.blank?
+      name = [first_name, last_name].reject(&:blank?).join(' ') if name.blank?
       name
     end
 
@@ -33,7 +41,8 @@ module WordPressImport
       user.wp_username = login
 
       unless user.persisted?
-        user.name = name
+        user.first_name = first_name
+        user.last_name = last_name
         user.password = 'password'
         user.password_confirmation = 'password'
       end
